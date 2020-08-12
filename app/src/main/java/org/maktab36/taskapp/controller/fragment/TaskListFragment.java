@@ -40,17 +40,10 @@ public class TaskListFragment extends Fragment {
     private TaskListAdapter mAdapter;
     private List<Task> mTasks;
     private ConstraintLayout mEmptyListLayout;
+    private TaskState mTaskState;
 
     public TaskListFragment() {
         // Required empty public constructor
-    }
-
-    public TaskListAdapter getAdapter() {
-        return mAdapter;
-    }
-
-    public void setAdapter(TaskListAdapter adapter) {
-        mAdapter = adapter;
     }
 
     public static TaskListFragment newInstance(TaskState state) {
@@ -65,12 +58,13 @@ public class TaskListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mTaskState = TaskState.valueOf(getArguments().getString(ARG_TASK_STATE));
+
         mTasks = getTaskList();
     }
 
     private List<Task> getTaskList() {
-        TaskState state = TaskState.valueOf(getArguments().getString(ARG_TASK_STATE));
-        switch (state) {
+        switch (mTaskState) {
             case DOING:
                 return TaskRepository.getInstance().getDoingTasks();
             case DONE:
@@ -99,10 +93,10 @@ public class TaskListFragment extends Fragment {
     }
 
     private void changeLayout() {
-        if(mTasks.size()==0){
+        if (mTasks.size() == 0) {
             mRecyclerView.setVisibility(View.GONE);
             mEmptyListLayout.setVisibility(View.VISIBLE);
-        }else{
+        } else {
             mRecyclerView.setVisibility(View.VISIBLE);
             mEmptyListLayout.setVisibility(View.GONE);
         }
@@ -110,24 +104,32 @@ public class TaskListFragment extends Fragment {
 
     private void findViews(View view) {
         mRecyclerView = view.findViewById(R.id.recycler_view_tasks);
-        mEmptyListLayout=view.findViewById(R.id.empty_list_layout);
+        mEmptyListLayout = view.findViewById(R.id.empty_list_layout);
     }
 
     /*private void setListener(){
     }*/
 
-    private void updateUI() {
-        mAdapter = new TaskListAdapter(this, mTasks);
-        mRecyclerView.setAdapter(mAdapter);
+    public void updateUI() {
+        if(mAdapter==null){
+            mAdapter = new TaskListAdapter(this, mTasks);
+            mRecyclerView.setAdapter(mAdapter);
+        }else{
+            mAdapter.notifyDataSetChanged();
+        }
+        changeLayout();
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if(resultCode!= Activity.RESULT_OK||data==null){
+        if (resultCode != Activity.RESULT_OK || data == null) {
             return;
         }
-        if(requestCode==TASK_DETAIL_REQUEST_CODE){
-
+        for (Fragment fragment:getActivity().getSupportFragmentManager().getFragments()) {
+            if(fragment instanceof TaskListFragment){
+                TaskListFragment listFragment= (TaskListFragment) fragment;
+                listFragment.updateUI();
+            }
         }
     }
 }

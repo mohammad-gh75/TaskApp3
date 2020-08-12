@@ -9,10 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".controller.activity.TaskListActivity"
-            android:label="@string/label_task_list"/>
-        <activity android:name=".controller.activity.TaskBuilderActivity"
-            android:label="@string/label_task_builder">
+        <activity android:name=".controller.activity.TabViewPagerActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

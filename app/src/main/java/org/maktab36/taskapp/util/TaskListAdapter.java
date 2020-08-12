@@ -1,13 +1,11 @@
 package org.maktab36.taskapp.util;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,7 +22,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskHo
 
     public TaskListAdapter(Fragment fragment, List<Task> taskList) {
         mFragment=fragment;
-        mTaskList = taskList;
+        mTaskList= taskList;
     }
 
     @NonNull
@@ -49,13 +47,15 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskHo
     public class TaskHolder extends RecyclerView.ViewHolder{
         private Task mTask;
         private TextView mTextViewTaskName;
-        private TextView mTextViewTaskState;
+        private TextView mTextViewTaskDate;
+        private TextView mTextViewTaskIcon;
 
         public TaskHolder(@NonNull View itemView) {
             super(itemView);
 
             mTextViewTaskName = itemView.findViewById(R.id.text_view_task_name);
-            mTextViewTaskState = itemView.findViewById(R.id.text_view_task_state);
+            mTextViewTaskDate = itemView.findViewById(R.id.text_view_task_date);
+            mTextViewTaskIcon=itemView.findViewById(R.id.text_view_task_icon);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -72,7 +72,8 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskHo
         public void bindTask(Task task) {
             mTask=task;
             mTextViewTaskName.setText(task.getName());
-            mTextViewTaskState.setText(task.getState().toString());
+            mTextViewTaskDate.setText(task.getDate().toString());
+            mTextViewTaskIcon.setText(String.valueOf(task.getName().charAt(0)));
         }
     }
 }
