@@ -34,6 +34,7 @@ import java.util.UUID;
 public class TaskDetailFragment extends DialogFragment {
     public static final String ARG_TASK_ID = "TaskId";
     public static final String DIALOG_FRAGMENT_TAG = "Dialog";
+    public static final String BUNDLE_VIEWS_ENABLED = "ViewsEnabled";
     public static final int DATE_PICKER_REQUEST_CODE = 0;
     public static final int TIME_PICKER_REQUEST_CODE = 1;
     private Task mCurrentTask;
@@ -51,6 +52,7 @@ public class TaskDetailFragment extends DialogFragment {
     private SimpleDateFormat mTimeFormatter;
     private TaskRepository mRepository;
     private boolean mButtonVisibility;
+    private boolean mViewsEnabled;
 
     public TaskDetailFragment() {
         // Required empty public constructor
@@ -73,7 +75,9 @@ public class TaskDetailFragment extends DialogFragment {
         if(taskId!=null) {
             mCurrentTask = mRepository.get(taskId);
             mButtonVisibility=false;
+            mViewsEnabled=false;
         }else{
+            mViewsEnabled=true;
             mButtonVisibility=true;
             mCurrentTask=new Task();
             mCurrentTask.setState(TaskState.TODO);
@@ -90,11 +94,10 @@ public class TaskDetailFragment extends DialogFragment {
         View view=inflater.inflate(R.layout.fragment_task_detail, container, false);
         findViews(view);
         setButtonsVisibility(mButtonVisibility);
+        loadState(savedInstanceState);
         setUI();
         setListeners();
-        if(mButtonVisibility){
-            setViewEnabled(true);
-        }
+        setViewEnabled(mViewsEnabled);
         return view;
     }
 
@@ -108,6 +111,17 @@ public class TaskDetailFragment extends DialogFragment {
         mButtonDelete=view.findViewById(R.id.button_delete);
         mButtonEdit=view.findViewById(R.id.button_edit);
         mButtonSave=view.findViewById(R.id.button_save);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(BUNDLE_VIEWS_ENABLED,mViewsEnabled);
+    }
+    private void loadState(Bundle saveInstanceState){
+        if(saveInstanceState!=null){
+            mViewsEnabled=saveInstanceState.getBoolean(BUNDLE_VIEWS_ENABLED);
+        }
     }
 
     private void setButtonsVisibility(boolean visibility) {
@@ -170,6 +184,7 @@ public class TaskDetailFragment extends DialogFragment {
         mButtonEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mViewsEnabled=true;
                 setViewEnabled(true);
             }
         });
@@ -225,10 +240,6 @@ public class TaskDetailFragment extends DialogFragment {
             mRadioGroupStates.getChildAt(i).setEnabled(enabled);
         }
     }
-
-//    private void updateTask(){
-//        mRepository.update(mCurrentTask);
-//    }
 
     private void setResult() {
         Fragment fragment = getTargetFragment();
