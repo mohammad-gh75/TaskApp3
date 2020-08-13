@@ -195,6 +195,18 @@ public class TaskRepository {
         }
     }
 
+    public void deleteAll(){
+        for (int i = 0; i <mDoingTasks.size() ; i++) {
+            mDoingTasks.remove(0);
+        }
+        for (int i = 0; i <mDoneTasks.size() ; i++) {
+            mDoneTasks.remove(0);
+        }
+        for (int i = 0; i <mToDoTasks.size() ; i++) {
+            mToDoTasks.remove(0);
+        }
+    }
+
 
     /*public void insertList(List<Task> list) {
     }

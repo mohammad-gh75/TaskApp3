@@ -1,17 +1,21 @@
 package org.maktab36.taskapp.controller.activity;
 
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
-
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
@@ -20,12 +24,8 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import org.maktab36.taskapp.R;
 import org.maktab36.taskapp.controller.fragment.TaskDetailFragment;
 import org.maktab36.taskapp.controller.fragment.TaskListFragment;
-import org.maktab36.taskapp.model.Task;
 import org.maktab36.taskapp.model.TaskState;
 import org.maktab36.taskapp.repository.TaskRepository;
-
-import java.util.Random;
-import java.util.UUID;
 
 public class TabViewPagerActivity extends AppCompatActivity {
     public static final String DIALOG_FRAGMENT_TAG = "activityDialog";
@@ -33,6 +33,7 @@ public class TabViewPagerActivity extends AppCompatActivity {
     private TabLayout mTabLayout;
     private ViewPager2 mTabViewPager;
     private FragmentStateAdapter mViewPagerAdapter;
+    private TaskRepository mRepository;
 
     public static Intent newIntent(Context context) {
         Intent intent = new Intent(context, TabViewPagerActivity.class);
@@ -43,6 +44,7 @@ public class TabViewPagerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tab_view_pager);
+        mRepository = TaskRepository.getInstance();
 
         findViews();
         updateUI();
@@ -97,7 +99,6 @@ public class TabViewPagerActivity extends AppCompatActivity {
     private void updateUI() {
         mViewPagerAdapter = new TaskViewPagerAdapter(this);
         mTabViewPager.setAdapter(mViewPagerAdapter);
-
     }
 
     private class TaskViewPagerAdapter extends FragmentStateAdapter {
@@ -122,5 +123,50 @@ public class TabViewPagerActivity extends AppCompatActivity {
         public int getItemCount() {
             return 3;
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_tasks_list, menu);
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_user_delete_all:
+                showDeleteDialog();
+                return true;
+            case R.id.menu_user_log_out:
+                startLoginActivity();
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+    }
+
+    private void startLoginActivity() {
+        Intent intent = LoginActivity.newIntent(TabViewPagerActivity.this);
+        startActivity(intent);
+    }
+
+    private void showDeleteDialog() {
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_delete_all_title)
+                .setMessage(R.string.dialog_delete_all_message)
+                .setPositiveButton(R.string.button_delete, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        mRepository.deleteAll();
+                        updateFragments();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+        dialog.show();
     }
 }
