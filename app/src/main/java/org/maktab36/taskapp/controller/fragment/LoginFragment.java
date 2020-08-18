@@ -23,7 +23,6 @@ import org.maktab36.taskapp.repository.UserRepository;
 
 public class LoginFragment extends Fragment {
     public static final int REQUEST_CODE_LOGIN_ACTIVITY = 2;
-    public static final String EXTRA_LOGIN_INFO = "org.maktab36.taskapp.loginInfo";
     private EditText mEditTextUsername;
     private EditText mEditTextPassword;
     private Button mButtonLogin;
@@ -83,10 +82,10 @@ public class LoginFragment extends Fragment {
         mButtonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mUser=new User();
-                mUser.setUsername(mEditTextUsername.getText().toString());
-                mUser.setPassword(mEditTextPassword.getText().toString());
-                if (checkInfo()) {
+                String username=mEditTextUsername.getText().toString();
+                String password=mEditTextPassword.getText().toString();
+                mUser=mRepository.getUser(username,password);
+                if (mUser!=null) {
                     mRepository.setCurrentUser(mUser);
                     startTabViewPagerActivity();
                 } else {
@@ -102,12 +101,6 @@ public class LoginFragment extends Fragment {
             }
         });
     }
-
-    private boolean checkInfo() {
-        return mUser != null && UserRepository.getInstance().containUser(mUser);
-    }
-
-
 
     private void startSignUpActivity() {
         String username=mEditTextUsername.getText().toString();

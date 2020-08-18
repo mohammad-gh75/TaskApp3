@@ -13,16 +13,24 @@ import org.maktab36.taskapp.R;
 import org.maktab36.taskapp.controller.fragment.TaskDetailFragment;
 import org.maktab36.taskapp.controller.fragment.TaskListFragment;
 import org.maktab36.taskapp.model.Task;
+import org.maktab36.taskapp.repository.UserRepository;
 
 import java.util.List;
+import java.util.UUID;
 
 public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskHolder> {
     private List<Task> mTaskList;
     private Fragment mFragment;
+    private UUID mUserId;
 
-    public TaskListAdapter(Fragment fragment, List<Task> taskList) {
+    public void setTaskList(List<Task> taskList) {
+        mTaskList = taskList;
+    }
+
+    public TaskListAdapter(Fragment fragment, List<Task> taskList, UUID userId) {
         mFragment=fragment;
         mTaskList= taskList;
+        mUserId=userId;
     }
 
     @NonNull
@@ -36,7 +44,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskHo
     @Override
     public void onBindViewHolder(@NonNull TaskHolder holder, int position) {
         Task task = mTaskList.get(position);
-        holder.bindTask(task);
+        holder.bindTask(task,mUserId);
     }
 
     @Override
@@ -49,6 +57,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskHo
         private TextView mTextViewTaskName;
         private TextView mTextViewTaskDate;
         private TextView mTextViewTaskIcon;
+        private TextView mTextViewTaskUser;
 
         public TaskHolder(@NonNull View itemView) {
             super(itemView);
@@ -56,6 +65,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskHo
             mTextViewTaskName = itemView.findViewById(R.id.text_view_task_name);
             mTextViewTaskDate = itemView.findViewById(R.id.text_view_task_date);
             mTextViewTaskIcon=itemView.findViewById(R.id.text_view_task_icon);
+            mTextViewTaskUser=itemView.findViewById(R.id.text_view_task_user);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -69,8 +79,12 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskHo
             });
         }
 
-        public void bindTask(Task task) {
+        public void bindTask(Task task,UUID userId) {
             mTask=task;
+            if(userId.equals(UserRepository.getInstance().getAdmin().getId())){
+                mTextViewTaskUser.setVisibility(View.VISIBLE);
+                mTextViewTaskUser.setText(UserRepository.getInstance().getUser(task.getUserId()).getUsername());
+            }
             mTextViewTaskName.setText(task.getName());
             mTextViewTaskDate.setText(task.getDate().toString());
             mTextViewTaskIcon.setText(String.valueOf(task.getName().charAt(0)));

@@ -35,6 +35,7 @@
     <string name="menu_user_delete_all_task">Delete All Task</string>
 
     <string name="toast_incorrect_info">نام كاربري يا رمز عبور صحيح نميباشد.</string>
+    <string name="toast_exist_user">این نام کاربری موجود میباشد!!\nنام کاربری دیگری انتخاب نمایید.</string>
     <string name="input_wrong_format">فرمت ورودی درست نیست!!</string>
 
 

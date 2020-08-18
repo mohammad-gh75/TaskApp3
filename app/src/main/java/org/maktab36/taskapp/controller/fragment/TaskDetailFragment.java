@@ -1,9 +1,6 @@
 package org.maktab36.taskapp.controller.fragment;
 
 import android.app.Activity;
-import android.app.DatePickerDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -24,6 +21,7 @@ import org.maktab36.taskapp.controller.activity.TabViewPagerActivity;
 import org.maktab36.taskapp.model.Task;
 import org.maktab36.taskapp.model.TaskState;
 import org.maktab36.taskapp.repository.TaskRepository;
+import org.maktab36.taskapp.repository.UserRepository;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -50,7 +48,8 @@ public class TaskDetailFragment extends DialogFragment {
     private Button mButtonCancel;
     private SimpleDateFormat mDateFormatter;
     private SimpleDateFormat mTimeFormatter;
-    private TaskRepository mRepository;
+    private TaskRepository mTaskRepository;
+    private UserRepository mUserRepository;
     private boolean mButtonVisibility;
     private boolean mViewsEnabled;
 
@@ -69,17 +68,18 @@ public class TaskDetailFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mRepository=TaskRepository.getInstance();
+        mTaskRepository =TaskRepository.getInstance();
+        mUserRepository=UserRepository.getInstance();
 
         UUID taskId= (UUID) getArguments().getSerializable(ARG_TASK_ID);
         if(taskId!=null) {
-            mCurrentTask = mRepository.get(taskId);
+            mCurrentTask = mTaskRepository.get(mUserRepository.getCurrentUser().getId(),taskId);
             mButtonVisibility=false;
             mViewsEnabled=false;
         }else{
             mViewsEnabled=true;
             mButtonVisibility=true;
-            mCurrentTask=new Task();
+            mCurrentTask=new Task(mUserRepository.getCurrentUser().getId());
             mCurrentTask.setState(TaskState.TODO);
             mCurrentTask.setDate(new Date());
         }
@@ -154,7 +154,7 @@ public class TaskDetailFragment extends DialogFragment {
         }
     }
     private Task getUI(){
-        Task tempTask=new Task();
+        Task tempTask=new Task(mUserRepository.getCurrentUser().getId());
         tempTask.setId(mCurrentTask.getId());
         tempTask.setName(mEditTextTitle.getText().toString());
         tempTask.setDescription(mEditTextDescription.getText().toString());
@@ -175,7 +175,7 @@ public class TaskDetailFragment extends DialogFragment {
         mButtonDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mRepository.delete(mCurrentTask);
+                mTaskRepository.delete(mCurrentTask);
                 setResult();
                 dismiss();
             }
@@ -196,10 +196,10 @@ public class TaskDetailFragment extends DialogFragment {
                 if(mButtonVisibility){
                     task.setDate(mCurrentTask.getDate());
                     mCurrentTask=task;
-                    mRepository.insert(mCurrentTask);
+                    mTaskRepository.insert(mCurrentTask);
                     ((TabViewPagerActivity)getActivity()).updateFragments();
                 }else{
-                    mRepository.update(task);
+                    mTaskRepository.update(mUserRepository.getCurrentUser().getId(),task);
                     setResult();
                 }
                 dismiss();

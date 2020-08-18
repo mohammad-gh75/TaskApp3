@@ -1,10 +1,32 @@
 package org.maktab36.taskapp.model;
 
+import android.webkit.URLUtil;
+
 import java.io.Serializable;
+import java.util.UUID;
 
 public class User {
+    private UUID mId;
     private String mUsername;
     private String mPassword;
+
+    public UUID getId() {
+        return mId;
+    }
+
+    public void setId(UUID id) {
+        mId = id;
+    }
+
+    public User() {
+        mId=UUID.randomUUID();
+    }
+
+    public User(String username, String password) {
+        this();
+        mUsername = username;
+        mPassword = password;
+    }
 
     public String getUsername() {
         return mUsername;

@@ -77,8 +77,13 @@ public class SignUpFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 if (checkInputValidity()) {
-                    saveInfo();
-                    getActivity().finish();
+                    if(checkInfo()) {
+                        saveInfo();
+                        getActivity().finish();
+                    }else{
+                        Toast.makeText(getActivity(),
+                                R.string.toast_exist_user, Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     Toast.makeText(getActivity(),
                             R.string.input_wrong_format, Toast.LENGTH_SHORT).show();
@@ -88,9 +93,9 @@ public class SignUpFragment extends Fragment {
     }
 
     private void saveInfo() {
-        mUser=new User();
-        mUser.setUsername(mEditTextUsername.getText().toString());
-        mUser.setPassword(mEditTextPassword.getText().toString());
+        String username=mEditTextUsername.getText().toString();
+        String password=mEditTextPassword.getText().toString();
+        mUser=new User(username,password);
         UserRepository.getInstance().addUser(mUser);
         Intent intent = new Intent();
         intent.putExtra(EXTRA_SIGN_USERNAME,mUser.getUsername());
@@ -102,5 +107,10 @@ public class SignUpFragment extends Fragment {
         String username = mEditTextUsername.getText().toString();
         String password = mEditTextPassword.getText().toString();
         return !username.equals("") && !password.equals("");
+    }
+
+    private boolean checkInfo() {
+        String username=mEditTextUsername.getText().toString();
+        return !(UserRepository.getInstance().containUser(username));
     }
 }

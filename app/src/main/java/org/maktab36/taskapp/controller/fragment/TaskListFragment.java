@@ -27,11 +27,13 @@ import org.maktab36.taskapp.R;
 import org.maktab36.taskapp.model.Task;
 import org.maktab36.taskapp.model.TaskState;
 import org.maktab36.taskapp.repository.TaskRepository;
+import org.maktab36.taskapp.repository.UserRepository;
 import org.maktab36.taskapp.util.TaskListAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 
 public class TaskListFragment extends Fragment {
@@ -62,17 +64,17 @@ public class TaskListFragment extends Fragment {
 
         mTaskState = TaskState.valueOf(getArguments().getString(ARG_TASK_STATE));
 
-        mTasks = getTaskList();
+        mTasks = getTaskList(UserRepository.getInstance().getCurrentUser().getId());
     }
 
-    private List<Task> getTaskList() {
+    private List<Task> getTaskList(UUID userId) {
         switch (mTaskState) {
             case DOING:
-                return TaskRepository.getInstance().getDoingTasks();
+                return TaskRepository.getInstance().getDoingTasks(userId);
             case DONE:
-                return TaskRepository.getInstance().getDoneTasks();
+                return TaskRepository.getInstance().getDoneTasks(userId);
             case TODO:
-                return TaskRepository.getInstance().getToDoTasks();
+                return TaskRepository.getInstance().getToDoTasks(userId);
         }
         return null;
     }
@@ -113,10 +115,13 @@ public class TaskListFragment extends Fragment {
     }*/
 
     public void updateUI() {
+        mTasks=getTaskList(UserRepository.getInstance().getCurrentUser().getId());
         if(mAdapter==null){
-            mAdapter = new TaskListAdapter(this, mTasks);
+            mAdapter = new TaskListAdapter(this, mTasks,
+                    UserRepository.getInstance().getCurrentUser().getId());
             mRecyclerView.setAdapter(mAdapter);
         }else{
+            mAdapter.setTaskList(mTasks);
             mAdapter.notifyDataSetChanged();
         }
         changeLayout();

@@ -26,6 +26,7 @@ import org.maktab36.taskapp.controller.fragment.TaskDetailFragment;
 import org.maktab36.taskapp.controller.fragment.TaskListFragment;
 import org.maktab36.taskapp.model.TaskState;
 import org.maktab36.taskapp.repository.TaskRepository;
+import org.maktab36.taskapp.repository.UserRepository;
 
 public class TabViewPagerActivity extends AppCompatActivity {
     public static final String DIALOG_FRAGMENT_TAG = "activityDialog";
@@ -161,7 +162,7 @@ public class TabViewPagerActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.button_delete, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        mRepository.deleteAll();
+                        mRepository.deleteAll(UserRepository.getInstance().getCurrentUser().getId());
                         updateFragments();
                     }
                 })

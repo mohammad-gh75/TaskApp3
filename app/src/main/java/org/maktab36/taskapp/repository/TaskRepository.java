@@ -10,13 +10,13 @@ import java.util.UUID;
 
 public class TaskRepository {
     private static TaskRepository sTaskRepository;
-    private String mTaskName="task";
-    private int mTaskNumber=2;
     private List<Task> mToDoTasks;
     private List<Task> mDoneTasks;
     private List<Task> mDoingTasks;
+    private UUID mAdminId;
 
     public static TaskRepository getInstance() {
+
         if(sTaskRepository==null){
             sTaskRepository=new TaskRepository();
         }
@@ -27,101 +27,74 @@ public class TaskRepository {
         mToDoTasks=new ArrayList<>();
         mDoneTasks=new ArrayList<>();
         mDoingTasks=new ArrayList<>();
-        for (int i = 1; i <= mTaskNumber; i++) {
-            Random random = new Random();
-            TaskState[] taskStates = TaskState.values();
-            int r = random.nextInt(taskStates.length);
-            Task task = new Task(mTaskName + "#" + i, taskStates[r]);
-//            mTasks.add(task);
-            switch (task.getState()) {
-                case TODO:
-                    mToDoTasks.add(task);
-                    break;
-                case DONE:
-                    mDoneTasks.add(task);
-                    break;
-                case DOING:
-                    mDoingTasks.add(task);
-                    break;
+        mAdminId=UserRepository.getInstance().getAdmin().getId();
+    }
+
+    public List<Task> getToDoTasks(UUID userId) {
+        if(userId.equals(mAdminId)){
+            return mToDoTasks;
+        }else {
+            List<Task> userToDoTask = new ArrayList<>();
+            for (int i = 0; i < mToDoTasks.size(); i++) {
+                if (mToDoTasks.get(i).getUserId().equals(userId)) {
+                    userToDoTask.add(mToDoTasks.get(i));
+                }
             }
+            return userToDoTask;
         }
     }
 
 
-
-    public String getTaskName() {
-        return mTaskName;
-    }
-
-    public void setTaskName(String taskName) {
-        mTaskName = taskName;
-    }
-
-    public int getTaskNumber() {
-        return mTaskNumber;
-    }
-
-    public void setTaskNumber(int taskNumber) {
-        mTaskNumber = taskNumber;
-    }
-
-    public List<Task> getToDoTasks() {
-        return mToDoTasks;
-    }
-
-    public void setToDoTasks(List<Task> toDoTasks) {
-        mToDoTasks = toDoTasks;
-    }
-
-    public List<Task> getDoneTasks() {
-        return mDoneTasks;
-    }
-
-    public void setDoneTasks(List<Task> doneTasks) {
-        mDoneTasks = doneTasks;
-    }
-
-    public List<Task> getDoingTasks() {
-        return mDoingTasks;
-    }
-
-    public void setDoingTasks(List<Task> doingTasks) {
-        mDoingTasks = doingTasks;
+    public List<Task> getDoneTasks(UUID userId) {
+        if(userId.equals(mAdminId)){
+            return mDoneTasks;
+        }else {
+            List<Task> userDoneTask = new ArrayList<>();
+            for (int i = 0; i < mDoneTasks.size(); i++) {
+                if (mDoneTasks.get(i).getUserId().equals(userId)) {
+                    userDoneTask.add(mDoneTasks.get(i));
+                }
+            }
+            return userDoneTask;
+        }
     }
 
 
-    public Task get(UUID uuid) {
+    public List<Task> getDoingTasks(UUID userId) {
+        if(userId.equals(mAdminId)){
+            return mDoingTasks;
+        }else {
+            List<Task> userDoingTask = new ArrayList<>();
+            for (int i = 0; i < mDoingTasks.size(); i++) {
+                if (mDoingTasks.get(i).getUserId().equals(userId)) {
+                    userDoingTask.add(mDoingTasks.get(i));
+                }
+            }
+            return userDoingTask;
+        }
+    }
+
+    public Task get(UUID userId,UUID uuid) {
         for (Task task:mToDoTasks) {
-            if(task.getId().equals(uuid)){
+            if((task.getUserId().equals(userId)||userId.equals(mAdminId))&&task.getId().equals(uuid)){
                 return task;
             }
         }
         for (Task task:mDoingTasks) {
-            if(task.getId().equals(uuid)){
+            if((task.getUserId().equals(userId)||userId.equals(mAdminId))&&task.getId().equals(uuid)){
                 return task;
             }
         }
         for (Task task:mDoneTasks) {
-            if(task.getId().equals(uuid)){
+            if((task.getUserId().equals(userId)||userId.equals(mAdminId))&&task.getId().equals(uuid)){
                 return task;
             }
         }
         return null;
     }
 
-    public void addRandomTask(){
-        Random random = new Random();
-        TaskState[] taskStates = TaskState.values();
-        int r = random.nextInt(taskStates.length);
-        Task task = new Task(mTaskName + "#" + (mTaskNumber+1), taskStates[r]);
-        insert(task);
-    }
-
-
-
-
-    public void update(Task task) {
-        Task updateTask=get(task.getId());
+    public void update(UUID userId,Task task) {
+        Task updateTask=get(userId,task.getId());
         if(updateTask!=null) {
             if (updateTask.getState() == task.getState()) {
                 updateTask.setName(task.getName());
@@ -158,21 +131,18 @@ public class TaskRepository {
         for (int i = 0; i <mDoingTasks.size() ; i++) {
             if(mDoingTasks.get(i).getId().equals(task.getId())){
                 mDoingTasks.remove(i);
-                mTaskNumber--;
                 return;
             }
         }
         for (int i = 0; i <mDoneTasks.size() ; i++) {
             if(mDoneTasks.get(i).getId().equals(task.getId())){
                 mDoneTasks.remove(i);
-                mTaskNumber--;
                 return;
             }
         }
         for (int i = 0; i <mToDoTasks.size() ; i++) {
             if(mToDoTasks.get(i).getId().equals(task.getId())){
                 mToDoTasks.remove(i);
-                mTaskNumber--;
                 return;
             }
         }
@@ -180,8 +150,6 @@ public class TaskRepository {
 
 
     public void insert(Task task) {
-        mTaskNumber++;
-//        mTasks.add(task);
         switch (task.getState()){
             case DOING:
                 mDoingTasks.add(task);
@@ -195,26 +163,25 @@ public class TaskRepository {
         }
     }
 
-    public void deleteAll(){
+    public void deleteAll(UUID userId){
         for (int i = 0; i <mDoingTasks.size() ; i++) {
-            mDoingTasks.remove(i);
-            i--;
+            if (userId.equals(mAdminId)||mDoingTasks.get(i).getUserId().equals(userId)) {
+                mDoingTasks.remove(i);
+                i--;
+            }
         }
         for (int i = 0; i <mDoneTasks.size() ; i++) {
-            mDoneTasks.remove(i);
-            i--;
+            if (userId.equals(mAdminId)||mDoneTasks.get(i).getUserId().equals(userId)) {
+                mDoneTasks.remove(i);
+                i--;
+            }
         }
         for (int i = 0; i <mToDoTasks.size() ; i++) {
-            mToDoTasks.remove(i);
-            i--;
+            if (userId.equals(mAdminId)||mToDoTasks.get(i).getUserId().equals(userId)) {
+                mToDoTasks.remove(i);
+                i--;
+            }
         }
     }
 
-
-    /*public void insertList(List<Task> list) {
-    }
-
-    public int getPosition(UUID uuid) {
-        return 0;
-    }*/
 }

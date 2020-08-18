@@ -11,6 +11,15 @@ public class Task {
     private TaskState mState;
     private String mDescription;
     private Date mDate;
+    private UUID mUserId;
+
+    public UUID getUserId() {
+        return mUserId;
+    }
+
+    public void setUserId(UUID userId) {
+        mUserId = userId;
+    }
 
     public String getName() {
         return mName;
@@ -52,13 +61,14 @@ public class Task {
         mDate = date;
     }
 
-    public Task() {
+    public Task(UUID userId) {
         mId = UUID.randomUUID();
         mDate= DateUtils.getRandomDate(2000,2020);
+        mUserId=userId;
     }
 
-    public Task(String name, TaskState state) {
-        this();
+    public Task(UUID userId,String name, TaskState state) {
+        this(userId);
         mName = name;
         mState = state;
     }
